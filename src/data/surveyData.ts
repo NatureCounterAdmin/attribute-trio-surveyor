@@ -6,41 +6,41 @@ export interface Attribute {
 }
 
 export const mainAttributes: Attribute[] = [
-  { id: '1', name: 'Leadership', relatedAttributes: ['Decision Making', 'Team Management'] },
-  { id: '2', name: 'Creativity', relatedAttributes: ['Innovation', 'Artistic Expression'] },
-  { id: '3', name: 'Communication', relatedAttributes: ['Public Speaking', 'Written Skills'] },
-  { id: '4', name: 'Problem Solving', relatedAttributes: ['Analytical Thinking', 'Critical Analysis'] },
-  { id: '5', name: 'Adaptability', relatedAttributes: ['Flexibility', 'Change Management'] },
-  { id: '6', name: 'Empathy', relatedAttributes: ['Understanding Others', 'Emotional Support'] },
-  { id: '7', name: 'Organization', relatedAttributes: ['Time Management', 'Planning'] },
-  { id: '8', name: 'Technical Skills', relatedAttributes: ['Programming', 'Software Proficiency'] },
-  { id: '9', name: 'Research', relatedAttributes: ['Data Analysis', 'Information Gathering'] },
-  { id: '10', name: 'Networking', relatedAttributes: ['Relationship Building', 'Social Connections'] },
-  { id: '11', name: 'Teaching', relatedAttributes: ['Knowledge Transfer', 'Mentoring'] },
-  { id: '12', name: 'Sales', relatedAttributes: ['Persuasion', 'Customer Relations'] },
-  { id: '13', name: 'Financial Management', relatedAttributes: ['Budgeting', 'Investment Planning'] },
-  { id: '14', name: 'Project Management', relatedAttributes: ['Resource Allocation', 'Timeline Management'] },
-  { id: '15', name: 'Design', relatedAttributes: ['Visual Design', 'User Experience'] },
-  { id: '16', name: 'Writing', relatedAttributes: ['Content Creation', 'Storytelling'] },
-  { id: '17', name: 'Marketing', relatedAttributes: ['Brand Strategy', 'Digital Marketing'] },
-  { id: '18', name: 'Customer Service', relatedAttributes: ['Client Support', 'Issue Resolution'] },
-  { id: '19', name: 'Strategy', relatedAttributes: ['Long-term Planning', 'Vision Development'] },
-  { id: '20', name: 'Quality Assurance', relatedAttributes: ['Testing', 'Process Improvement'] },
-  { id: '21', name: 'Negotiation', relatedAttributes: ['Conflict Resolution', 'Deal Making'] },
-  { id: '22', name: 'Innovation', relatedAttributes: ['Idea Generation', 'Product Development'] },
-  { id: '23', name: 'Risk Management', relatedAttributes: ['Risk Assessment', 'Mitigation Strategies'] },
-  { id: '24', name: 'Cultural Awareness', relatedAttributes: ['Diversity Understanding', 'Global Perspective'] },
-  { id: '25', name: 'Health & Wellness', relatedAttributes: ['Fitness Coaching', 'Nutrition Knowledge'] },
-  { id: '26', name: 'Environmental Sustainability', relatedAttributes: ['Green Practices', 'Conservation'] },
-  { id: '27', name: 'Legal Knowledge', relatedAttributes: ['Compliance', 'Contract Review'] },
-  { id: '28', name: 'Data Science', relatedAttributes: ['Statistical Analysis', 'Machine Learning'] },
-  { id: '29', name: 'Event Planning', relatedAttributes: ['Logistics Coordination', 'Vendor Management'] },
-  { id: '30', name: 'Photography', relatedAttributes: ['Visual Composition', 'Photo Editing'] },
-  { id: '31', name: 'Music', relatedAttributes: ['Performance', 'Composition'] },
-  { id: '32', name: 'Cooking', relatedAttributes: ['Recipe Development', 'Food Presentation'] },
-  { id: '33', name: 'Travel Planning', relatedAttributes: ['Itinerary Design', 'Budget Management'] },
-  { id: '34', name: 'Language Skills', relatedAttributes: ['Translation', 'Cultural Communication'] },
-  { id: '35', name: 'Physical Fitness', relatedAttributes: ['Exercise Programming', 'Athletic Performance'] }
+  { id: '1', name: 'Adaptability', relatedAttributes: ['Resilience', 'Emotion'] },
+  { id: '2', name: 'Awareness', relatedAttributes: ['Focus', 'Cognition'] },
+  { id: '3', name: 'Balance', relatedAttributes: ['Strength', 'Calmness'] },
+  { id: '4', name: 'Breathing', relatedAttributes: ['Focus', 'Energy'] },
+  { id: '5', name: 'Calmness', relatedAttributes: ['Vitality', 'Resilience'] },
+  { id: '6', name: 'Cardiohealth', relatedAttributes: ['Endurance', 'Strength'] },
+  { id: '7', name: 'Clarity', relatedAttributes: ['Focus', 'Mindfulness'] },
+  { id: '8', name: 'Confidence', relatedAttributes: ['Selfhood', 'Assertiveness'] },
+  { id: '9', name: 'Connection', relatedAttributes: ['Empathy', 'Community'] },
+  { id: '10', name: 'Creativity', relatedAttributes: ['Imagination', 'Positivity'] },
+  { id: '11', name: 'Curiosity', relatedAttributes: ['Awareness', 'Engagement'] },
+  { id: '12', name: 'Digestion', relatedAttributes: ['Energy', 'Immunity'] },
+  { id: '13', name: 'Empathy', relatedAttributes: ['Compassion', 'Community'] },
+  { id: '14', name: 'Endurance', relatedAttributes: ['Circulation', 'Strength'] },
+  { id: '15', name: 'Energy', relatedAttributes: ['Focus', 'Motivation'] },
+  { id: '16', name: 'Esteem', relatedAttributes: ['Confidence', 'Selfhood'] },
+  { id: '17', name: 'Expression', relatedAttributes: ['Confidence', 'Resilience'] },
+  { id: '18', name: 'Focus', relatedAttributes: ['Adaptability', 'Mindfulness'] },
+  { id: '19', name: 'Happiness', relatedAttributes: ['Positivity', 'Wellbeing'] },
+  { id: '20', name: 'Hope', relatedAttributes: ['Optimism', 'Resilience'] },
+  { id: '21', name: 'Immunity', relatedAttributes: ['Wellbeing', 'Energy'] },
+  { id: '22', name: 'Inspiration', relatedAttributes: ['Creativity', 'Positivity'] },
+  { id: '23', name: 'Longevity', relatedAttributes: ['Energy', 'Immunity'] },
+  { id: '24', name: 'Memory', relatedAttributes: ['Focus', 'Cognition'] },
+  { id: '25', name: 'Mindfulness', relatedAttributes: ['Calmness', 'Awareness'] },
+  { id: '26', name: 'Mood', relatedAttributes: ['Positivity', 'Wellbeing'] },
+  { id: '27', name: 'Patience', relatedAttributes: ['Calmness', 'Endurance'] },
+  { id: '28', name: 'Positivity', relatedAttributes: ['Optimism', 'Energy'] },
+  { id: '29', name: 'Relaxation', relatedAttributes: ['Calmness', 'Focus'] },
+  { id: '30', name: 'Resilience', relatedAttributes: ['Emotion', 'Direction'] },
+  { id: '31', name: 'Sleep', relatedAttributes: ['Energy', 'Calmness'] },
+  { id: '32', name: 'Social', relatedAttributes: ['Emotion', 'Wellbeing'] },
+  { id: '33', name: 'Strength', relatedAttributes: ['Endurance', 'Cardiohealth'] },
+  { id: '34', name: 'Trust', relatedAttributes: ['Connection', 'Wellbeing'] },
+  { id: '35', name: 'Wellbeing', relatedAttributes: ['Happiness', 'Immunity'] }
 ];
 
 export interface SurveyResponse {
@@ -49,6 +49,6 @@ export interface SurveyResponse {
   email: string;
   selectedAttributes: {
     mainAttribute: string;
-    rankings: string[];
+    scores: { [attribute: string]: number };
   }[];
 }

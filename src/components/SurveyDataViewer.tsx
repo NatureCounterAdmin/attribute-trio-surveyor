@@ -21,21 +21,48 @@ const SurveyDataViewer = () => {
   const exportToCsv = () => {
     if (surveyData.length === 0) return;
 
-    const headers = ['Timestamp', 'Name', 'Email', 'Main Attribute 1', 'Rankings 1', 'Main Attribute 2', 'Rankings 2', 'Main Attribute 3', 'Rankings 3'];
+    const headers = ['Timestamp', 'Name', 'Email'];
+    
+    // Add headers for each selection (main attribute + scores)
+    for (let i = 1; i <= 3; i++) {
+      headers.push(`Main Attribute ${i}`);
+      headers.push(`Main Attribute ${i} Score`);
+      headers.push(`Related Attribute ${i}A`);
+      headers.push(`Related Attribute ${i}A Score`);
+      headers.push(`Related Attribute ${i}B`);
+      headers.push(`Related Attribute ${i}B Score`);
+    }
     
     const csvContent = [
       headers.join(','),
-      ...surveyData.map(response => [
-        new Date(response.timestamp).toLocaleString(),
-        response.name,
-        response.email,
-        response.selectedAttributes[0]?.mainAttribute || '',
-        response.selectedAttributes[0]?.rankings.join('; ') || '',
-        response.selectedAttributes[1]?.mainAttribute || '',
-        response.selectedAttributes[1]?.rankings.join('; ') || '',
-        response.selectedAttributes[2]?.mainAttribute || '',
-        response.selectedAttributes[2]?.rankings.join('; ') || ''
-      ].map(field => `"${field}"`).join(','))
+      ...surveyData.map(response => {
+        const row = [
+          new Date(response.timestamp).toLocaleString(),
+          response.name,
+          response.email
+        ];
+        
+        // Add data for each selection
+        for (let i = 0; i < 3; i++) {
+          const selection = response.selectedAttributes[i];
+          if (selection) {
+            row.push(selection.mainAttribute);
+            row.push(selection.scores[selection.mainAttribute]?.toString() || '');
+            
+            // Find related attributes (non-main attributes)
+            const relatedAttrs = Object.keys(selection.scores).filter(attr => attr !== selection.mainAttribute);
+            row.push(relatedAttrs[0] || '');
+            row.push(selection.scores[relatedAttrs[0]]?.toString() || '');
+            row.push(relatedAttrs[1] || '');
+            row.push(selection.scores[relatedAttrs[1]]?.toString() || '');
+          } else {
+            // Fill empty columns if selection doesn't exist
+            row.push('', '', '', '', '', '');
+          }
+        }
+        
+        return row.map(field => `"${field}"`).join(',');
+      })
     ].join('\n');
 
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -82,7 +109,7 @@ const SurveyDataViewer = () => {
                     <TableHead>Timestamp</TableHead>
                     <TableHead>Name</TableHead>
                     <TableHead>Email</TableHead>
-                    <TableHead>Attributes & Rankings</TableHead>
+                    <TableHead>Attributes & Scores</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -94,13 +121,20 @@ const SurveyDataViewer = () => {
                       <TableCell>{response.name}</TableCell>
                       <TableCell>{response.email}</TableCell>
                       <TableCell>
-                        <div className="space-y-2">
+                        <div className="space-y-3">
                           {response.selectedAttributes.map((attr, attrIndex) => (
-                            <div key={attrIndex} className="text-sm">
-                              <span className="font-semibold">{attr.mainAttribute}:</span>
-                              <span className="ml-2 text-gray-600">
-                                {attr.rankings.join(' → ')}
-                              </span>
+                            <div key={attrIndex} className="text-sm border-l-2 border-blue-200 pl-3">
+                              <span className="font-semibold text-blue-700">{attr.mainAttribute} (Main)</span>
+                              <div className="ml-4 space-y-1">
+                                {Object.entries(attr.scores).map(([attribute, score]) => (
+                                  <div key={attribute} className="flex justify-between">
+                                    <span className={attribute === attr.mainAttribute ? 'font-medium' : 'text-gray-600'}>
+                                      {attribute}:
+                                    </span>
+                                    <span className="font-semibold">{score}/5</span>
+                                  </div>
+                                ))}
+                              </div>
                             </div>
                           ))}
                         </div>

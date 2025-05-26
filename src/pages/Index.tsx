@@ -36,15 +36,15 @@ const Index = () => {
     console.log('Attribute selected:', attribute.name);
   };
 
-  const handleRanking = (rankings: string[]) => {
+  const handleRanking = (scores: { [attribute: string]: number }) => {
     const currentAttribute = selectedAttributes[currentSelection - 1];
     const newResponse = {
       mainAttribute: currentAttribute.name,
-      rankings: rankings
+      scores: scores
     };
     
     setSurveyResponses([...surveyResponses, newResponse]);
-    console.log('Rankings submitted:', rankings);
+    console.log('Scores submitted:', scores);
 
     if (currentSelection === 3) {
       // Survey complete
