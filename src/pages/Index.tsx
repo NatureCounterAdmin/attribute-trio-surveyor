@@ -1,133 +1,197 @@
+// src/pages/Index.tsx
 
-import React, { useState } from 'react';
-import { toast } from '@/hooks/use-toast';
-import { mainAttributes, SurveyResponse, Attribute } from '@/data/surveyData';
-import ProgressBar from '@/components/ProgressBar';
-import UserInfoForm from '@/components/UserInfoForm';
-import AttributeSelector from '@/components/AttributeSelector';
-import AttributeRanking from '@/components/AttributeRanking';
-import ThankYou from '@/components/ThankYou';
+import React, { useState, useEffect } from 'react';
+import UserInfoForm from '@/UserInfoForm';
+import AttributeSelector from '@/AttributeSelector';
+import AttributeRanking from '@/AttributeRanking';
+import ThankYou from '@/ThankYou';
+import ProgressBar from '@/ProgressBar';
+import { attributes, Attribute, SelectedAttribute, SurveyResponse } from '@/data/surveyData';
+import { initializeApp } from 'firebase/app';
+import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from 'firebase/auth';
+import { getFirestore, collection, addDoc } from 'firebase/firestore';
 
-type SurveyStep = 'userInfo' | 'selectAttribute' | 'rankAttributes' | 'thankYou';
+// Define the steps of the survey.
+const TOTAL_STEPS = 5; // UserInfoForm, 3x Attribute Selection/Ranking, ThankYou
 
 const Index = () => {
-  const [currentStep, setCurrentStep] = useState<SurveyStep>('userInfo');
-  const [stepNumber, setStepNumber] = useState(1);
-  const [userInfo, setUserInfo] = useState<{ name: string; email: string }>({ name: '', email: '' });
-  const [selectedAttributes, setSelectedAttributes] = useState<Attribute[]>([]);
-  const [currentSelection, setCurrentSelection] = useState(1);
-  const [surveyResponses, setSurveyResponses] = useState<SurveyResponse['selectedAttributes']>([]);
-  const [availableAttributes, setAvailableAttributes] = useState<Attribute[]>(mainAttributes);
+  // State variables for the survey flow.
+  const [currentStep, setCurrentStep] = useState(1);
+  const [userName, setUserName] = useState('');
+  const [userEmail, setUserEmail] = useState('');
+  const [availableAttributes, setAvailableAttributes] = useState<Attribute[]>(attributes);
+  const [selectedAttributesData, setSelectedAttributesData] = useState<SelectedAttribute[]>([]);
 
-  const totalSteps = 8; // userInfo(1) + select1(2) + rank1(3) + select2(4) + rank2(5) + select3(6) + rank3(7) + thankYou(8)
+  // Firebase state variables.
+  const [db, setDb] = useState<any>(null);
+  const [auth, setAuth] = useState<any>(null);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [isAuthReady, setIsAuthReady] = useState(false);
 
-  const handleUserInfo = (name: string, email: string) => {
-    setUserInfo({ name, email });
-    setCurrentStep('selectAttribute');
-    setStepNumber(2);
-    console.log('User info collected:', { name, email });
-  };
+  // Initialize Firebase and handle authentication.
+  useEffect(() => {
+    try {
+      // Access global variables provided by the Canvas environment.
+      const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+      const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+      const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
-  const handleAttributeSelection = (attribute: Attribute) => {
-    setSelectedAttributes([...selectedAttributes, attribute]);
-    setAvailableAttributes(availableAttributes.filter(attr => attr.id !== attribute.id));
-    setCurrentStep('rankAttributes');
-    setStepNumber(stepNumber + 1);
-    console.log('Attribute selected:', attribute.name);
-  };
+      // Initialize Firebase app.
+      const app = initializeApp(firebaseConfig);
+      const firestoreDb = getFirestore(app);
+      const firebaseAuth = getAuth(app);
 
-  const handleRanking = (scores: { [attribute: string]: number }) => {
-    const currentAttribute = selectedAttributes[currentSelection - 1];
-    const newResponse = {
-      mainAttribute: currentAttribute.name,
-      scores: scores
-    };
-    
-    const updatedResponses = [...surveyResponses, newResponse];
-    setSurveyResponses(updatedResponses);
-    console.log('Scores submitted:', scores);
+      setDb(firestoreDb);
+      setAuth(firebaseAuth);
 
-    if (currentSelection === 3) {
-      // Survey complete - store the final response
-      const finalResponse: SurveyResponse = {
-        timestamp: new Date().toISOString(),
-        name: userInfo.name,
-        email: userInfo.email,
-        selectedAttributes: updatedResponses
-      };
-      
-      // Get existing responses and add the new one
-      const existingResponses = JSON.parse(localStorage.getItem('surveyResponses') || '[]');
-      const allResponses = [...existingResponses, finalResponse];
-      localStorage.setItem('surveyResponses', JSON.stringify(allResponses));
-      
-      console.log('Survey completed:', finalResponse);
-      console.log('All stored responses:', allResponses);
-      
-      toast({
-        title: "Survey Completed!",
-        description: "Your responses have been saved successfully.",
+      // Listen for authentication state changes.
+      const unsubscribe = onAuthStateChanged(firebaseAuth, async (user) => {
+        if (user) {
+          // User is signed in.
+          setUserId(user.uid);
+        } else {
+          // User is signed out, attempt to sign in anonymously or with custom token.
+          try {
+            if (initialAuthToken) {
+              await signInWithCustomToken(firebaseAuth, initialAuthToken);
+            } else {
+              await signInAnonymously(firebaseAuth);
+            }
+          } catch (error) {
+            console.error("Firebase authentication error:", error);
+          }
+        }
+        setIsAuthReady(true); // Mark authentication as ready.
       });
-      
-      setCurrentStep('thankYou');
-      setStepNumber(8);
+
+      // Clean up the auth listener on component unmount.
+      return () => unsubscribe();
+    } catch (error) {
+      console.error("Failed to initialize Firebase:", error);
+    }
+  }, []);
+
+  // Handle user info submission.
+  const handleUserInfoSubmit = (name: string, email: string) => {
+    setUserName(name);
+    setUserEmail(email);
+    setCurrentStep(2); // Move to attribute selection.
+  };
+
+  // Handle attribute selection.
+  const handleAttributeSelect = (attribute: Attribute) => {
+    // Remove the selected attribute from the available list.
+    setAvailableAttributes(prev => prev.filter(attr => attr.id !== attribute.id));
+    // Store the main attribute for the current selection.
+    setSelectedAttributesData(prev => [
+      ...prev,
+      { mainAttribute: attribute.name, scores: {} } // Initialize scores as empty.
+    ]);
+    setCurrentStep(currentStep + 1); // Move to attribute ranking.
+  };
+
+  // Handle attribute ranking submission.
+  const handleAttributeRanking = (scores: { [attribute: string]: number }) => {
+    setSelectedAttributesData(prev => {
+      const lastSelectionIndex = prev.length - 1;
+      const updatedSelections = [...prev];
+      // Update the scores for the last selected attribute.
+      updatedSelections[lastSelectionIndex].scores = scores;
+      return updatedSelections;
+    });
+
+    if (currentStep < TOTAL_STEPS - 1) { // If not the last ranking step.
+      setCurrentStep(currentStep + 1);
     } else {
-      // Move to next selection
-      setCurrentSelection(currentSelection + 1);
-      setCurrentStep('selectAttribute');
-      setStepNumber(stepNumber + 1);
+      // If all selections are done, save the survey data and move to thank you.
+      saveSurveyData();
+      setCurrentStep(TOTAL_STEPS);
     }
   };
 
-  const handleStartOver = () => {
-    setCurrentStep('userInfo');
-    setStepNumber(1);
-    setUserInfo({ name: '', email: '' });
-    setSelectedAttributes([]);
-    setCurrentSelection(1);
-    setSurveyResponses([]);
-    setAvailableAttributes(mainAttributes);
-    console.log('Survey reset');
+  // Save survey data to Firestore.
+  const saveSurveyData = async () => {
+    if (!db || !userId || !isAuthReady) {
+      console.error("Firestore not initialized or user not authenticated.");
+      return;
+    }
+
+    try {
+      const surveyResponse: SurveyResponse = {
+        timestamp: Date.now(),
+        name: userName,
+        email: userEmail,
+        selectedAttributes: selectedAttributesData,
+      };
+
+      // Define the collection path for public data.
+      const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+      const collectionPath = `artifacts/${appId}/public/data/surveyResponses`;
+
+      // Add the document to the 'surveyResponses' collection.
+      await addDoc(collection(db, collectionPath), surveyResponse);
+      console.log("Survey data saved to Firestore!");
+    } catch (e) {
+      console.error("Error adding document: ", e);
+    }
   };
 
-  const getCurrentAttribute = () => {
-    return selectedAttributes[currentSelection - 1];
+  // Reset the survey to start over.
+  const handleStartOver = () => {
+    setCurrentStep(1);
+    setUserName('');
+    setUserEmail('');
+    setAvailableAttributes(attributes);
+    setSelectedAttributesData([]);
+  };
+
+  // Render the appropriate component based on the current step.
+  const renderStep = () => {
+    switch (currentStep) {
+      case 1:
+        return <UserInfoForm onNext={handleUserInfoSubmit} />;
+      case 2:
+      case 3:
+      case 4:
+        const currentSelectionIndex = currentStep - 2; // 0-indexed for selectedAttributesData.
+        const currentMainAttribute = selectedAttributesData[currentSelectionIndex]?.mainAttribute;
+        const currentRelatedAttributes = attributes.find(attr => attr.name === currentMainAttribute)?.relatedAttributes || [];
+
+        if (currentMainAttribute && currentRelatedAttributes.length > 0 && Object.keys(selectedAttributesData[currentSelectionIndex].scores).length === 0) {
+          // If a main attribute is selected but not yet ranked, show ranking.
+          return (
+            <AttributeRanking
+              mainAttribute={currentMainAttribute}
+              relatedAttributes={currentRelatedAttributes}
+              onNext={handleAttributeRanking}
+              selectionNumber={currentSelectionIndex + 1}
+            />
+          );
+        } else {
+          // Otherwise, show attribute selection.
+          return (
+            <AttributeSelector
+              attributes={availableAttributes}
+              onSelect={handleAttributeSelect}
+              selectionNumber={currentSelectionIndex + 1}
+              totalSelections={3}
+            />
+          );
+        }
+      case TOTAL_STEPS:
+        return <ThankYou onStartOver={handleStartOver} />;
+      default:
+        return <UserInfoForm onNext={handleUserInfoSubmit} />;
+    }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8 px-4">
-      <div className="max-w-6xl mx-auto">
-        {currentStep !== 'thankYou' && (
-          <ProgressBar currentStep={stepNumber} totalSteps={totalSteps} />
+    <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-4">
+      <div className="w-full max-w-4xl bg-white p-8 rounded-lg shadow-md">
+        {currentStep > 1 && currentStep < TOTAL_STEPS && (
+          <ProgressBar currentStep={currentStep} totalSteps={TOTAL_STEPS} />
         )}
-        
-        <div className="bg-white rounded-lg shadow-lg p-8">
-          {currentStep === 'userInfo' && (
-            <UserInfoForm onNext={handleUserInfo} />
-          )}
-          
-          {currentStep === 'selectAttribute' && (
-            <AttributeSelector
-              attributes={availableAttributes}
-              onSelect={handleAttributeSelection}
-              selectionNumber={currentSelection}
-              totalSelections={3}
-            />
-          )}
-          
-          {currentStep === 'rankAttributes' && (
-            <AttributeRanking
-              mainAttribute={getCurrentAttribute().name}
-              relatedAttributes={getCurrentAttribute().relatedAttributes}
-              onNext={handleRanking}
-              selectionNumber={currentSelection}
-            />
-          )}
-          
-          {currentStep === 'thankYou' && (
-            <ThankYou onStartOver={handleStartOver} />
-          )}
-        </div>
+        {renderStep()}
       </div>
     </div>
   );
