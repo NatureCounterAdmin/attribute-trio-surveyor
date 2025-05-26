@@ -3,6 +3,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { CheckCircle } from 'lucide-react';
+import SurveyDataViewer from './SurveyDataViewer';
 
 interface ThankYouProps {
   onStartOver: () => void;
@@ -10,7 +11,7 @@ interface ThankYouProps {
 
 const ThankYou = ({ onStartOver }: ThankYouProps) => {
   return (
-    <div className="max-w-2xl mx-auto text-center">
+    <div className="max-w-4xl mx-auto text-center">
       <Card className="p-8">
         <div className="mb-6">
           <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
@@ -31,6 +32,8 @@ const ThankYou = ({ onStartOver }: ThankYouProps) => {
         <Button onClick={onStartOver} variant="outline" className="px-8 py-2">
           Take Survey Again
         </Button>
+
+        <SurveyDataViewer />
       </Card>
     </div>
   );
