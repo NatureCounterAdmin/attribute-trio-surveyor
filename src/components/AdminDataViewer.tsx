@@ -55,14 +55,21 @@ const AdminDataViewer = () => {
           const selection = response.selectedAttributes[i];
           if (selection) {
             row.push(selection.mainAttribute);
-            row.push(selection.scores[selection.mainAttribute]?.toString() || '');
             
-            // Find related attributes (non-main attributes)
-            const relatedAttrs = Object.keys(selection.scores).filter(attr => attr !== selection.mainAttribute);
-            row.push(relatedAttrs[0] || '');
-            row.push(selection.scores[relatedAttrs[0]]?.toString() || '');
-            row.push(relatedAttrs[1] || '');
-            row.push(selection.scores[relatedAttrs[1]]?.toString() || '');
+            // Handle both new format (scores) and old format (rankings)
+            if (selection.scores) {
+              row.push(selection.scores[selection.mainAttribute]?.toString() || '');
+              
+              // Find related attributes (non-main attributes)
+              const relatedAttrs = Object.keys(selection.scores).filter(attr => attr !== selection.mainAttribute);
+              row.push(relatedAttrs[0] || '');
+              row.push(selection.scores[relatedAttrs[0]]?.toString() || '');
+              row.push(relatedAttrs[1] || '');
+              row.push(selection.scores[relatedAttrs[1]]?.toString() || '');
+            } else {
+              // Handle old ranking format - just put empty scores
+              row.push('', '', '', '', '');
+            }
           } else {
             // Fill empty columns if selection doesn't exist
             row.push('', '', '', '', '', '');
@@ -143,7 +150,8 @@ const AdminDataViewer = () => {
                             <div key={attrIndex} className="text-sm border-l-2 border-blue-200 pl-3">
                               <span className="font-semibold text-blue-700">{attr.mainAttribute} (Main)</span>
                               <div className="ml-4 space-y-1">
-                                {Object.entries(attr.scores).map(([attribute, score]) => (
+                                {/* Handle new format with scores */}
+                                {attr.scores && Object.entries(attr.scores).map(([attribute, score]) => (
                                   <div key={attribute} className="flex justify-between">
                                     <span className={attribute === attr.mainAttribute ? 'font-medium' : 'text-gray-600'}>
                                       {attribute}:
@@ -151,6 +159,12 @@ const AdminDataViewer = () => {
                                     <span className="font-semibold">{score}/5</span>
                                   </div>
                                 ))}
+                                {/* Handle old format with rankings */}
+                                {!attr.scores && (attr as any).rankings && (
+                                  <div className="text-gray-600">
+                                    <span>Rankings: {(attr as any).rankings.join(', ')}</span>
+                                  </div>
+                                )}
                               </div>
                             </div>
                           ))}
