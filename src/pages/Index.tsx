@@ -43,23 +43,27 @@ const Index = () => {
       scores: scores
     };
     
-    setSurveyResponses([...surveyResponses, newResponse]);
+    const updatedResponses = [...surveyResponses, newResponse];
+    setSurveyResponses(updatedResponses);
     console.log('Scores submitted:', scores);
 
     if (currentSelection === 3) {
-      // Survey complete
+      // Survey complete - store the final response
       const finalResponse: SurveyResponse = {
         timestamp: new Date().toISOString(),
         name: userInfo.name,
         email: userInfo.email,
-        selectedAttributes: [...surveyResponses, newResponse]
+        selectedAttributes: updatedResponses
       };
       
-      // Store in localStorage
+      // Get existing responses and add the new one
       const existingResponses = JSON.parse(localStorage.getItem('surveyResponses') || '[]');
-      localStorage.setItem('surveyResponses', JSON.stringify([...existingResponses, finalResponse]));
+      const allResponses = [...existingResponses, finalResponse];
+      localStorage.setItem('surveyResponses', JSON.stringify(allResponses));
       
       console.log('Survey completed:', finalResponse);
+      console.log('All stored responses:', allResponses);
+      
       toast({
         title: "Survey Completed!",
         description: "Your responses have been saved successfully.",

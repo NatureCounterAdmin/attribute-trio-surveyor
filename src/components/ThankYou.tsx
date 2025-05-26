@@ -3,7 +3,6 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { CheckCircle } from 'lucide-react';
-import SurveyDataViewer from './SurveyDataViewer';
 
 interface ThankYouProps {
   onStartOver: () => void;
@@ -32,8 +31,6 @@ const ThankYou = ({ onStartOver }: ThankYouProps) => {
         <Button onClick={onStartOver} variant="outline" className="px-8 py-2">
           Take Survey Again
         </Button>
-
-        <SurveyDataViewer />
       </Card>
     </div>
   );
